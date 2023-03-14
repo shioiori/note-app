@@ -7,6 +7,7 @@ import androidx.activity.result.PickVisualMediaRequest;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.coordinatorlayout.widget.CoordinatorLayout;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
@@ -42,6 +43,7 @@ import android.widget.Toast;
 
 import com.example.noteapp.R;
 import com.example.noteapp.database.NotesDatabase;
+import com.example.noteapp.entities.AudioRecord;
 import com.example.noteapp.entities.Note;
 
 import java.io.InputStream;
@@ -60,15 +62,24 @@ public class CreateNoteActivity extends AppCompatActivity {
     private TextView textDateTime;
     private ImageView imageNote;
     private ImageView imageAddImage;
+    private ImageView imageAddRecord;
 
     private String selectedImagePath;
     private String selectedNoteColor;
+    private String selectedRecord;
 
     public static final int REQUEST_CODE_STORAGE_PERMISSION = 1;
+    public static final int REQUEST_CODE_RECORD_AUDIO = 2;
 
     private Note alreadyAvailableNote;
 
     private AlertDialog dialogDeleteNote;
+
+    private AudioRecord audioRecord;
+
+    private ConstraintLayout itemContainerRecord;
+
+    public boolean recordStart;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -87,6 +98,9 @@ public class CreateNoteActivity extends AppCompatActivity {
         textDateTime = findViewById(R.id.textDateTime);
         imageNote = findViewById(R.id.imageNote);
         imageAddImage = findViewById(R.id.imageAddImage);
+        imageAddRecord = findViewById(R.id.imageAddRecord);
+
+        itemContainerRecord = findViewById(R.id.layoutRecord);
 
         textDateTime.setText(
                 new SimpleDateFormat("EEEE, dd MMMM yyyy HH:mm a", Locale.getDefault())
@@ -103,6 +117,8 @@ public class CreateNoteActivity extends AppCompatActivity {
 
         selectedImagePath = "";
         selectedNoteColor = "#333333";
+        selectedRecord = "";
+        recordStart = true;
 
         if (getIntent().getBooleanExtra("isViewOrUpdate", false)){
             alreadyAvailableNote = (Note) getIntent().getSerializableExtra("note");
@@ -121,6 +137,8 @@ public class CreateNoteActivity extends AppCompatActivity {
 
         addImage();
         initBackgroundColor();
+        initRecord();
+        addRecord();
     }
 
     private void setViewOrUpdateNote() {
@@ -137,6 +155,14 @@ public class CreateNoteActivity extends AppCompatActivity {
 
         if (alreadyAvailableNote.getColor() != null && alreadyAvailableNote.getColor().trim().isEmpty()) {
             selectedNoteColor = alreadyAvailableNote.getColor();
+        }
+
+        Log.d("DEBUG", "da di qua cho nay");
+
+        if (alreadyAvailableNote.getRecord() != null && !alreadyAvailableNote.getRecord().trim().isEmpty()) {
+            audioRecord = new AudioRecord(alreadyAvailableNote.getRecord());
+            itemContainerRecord.setVisibility(View.VISIBLE);
+            selectedRecord = alreadyAvailableNote.getRecord();
         }
     }
 
@@ -156,6 +182,7 @@ public class CreateNoteActivity extends AppCompatActivity {
         note.setDateTime(textDateTime.getText().toString());
         note.setImagePath(selectedImagePath);
         note.setColor(selectedNoteColor);
+        note.setRecord(selectedRecord);
 
 
         if (alreadyAvailableNote != null){
@@ -184,13 +211,6 @@ public class CreateNoteActivity extends AppCompatActivity {
         });
     }
 
-    private void selectImage(){
-        Log.d("DEBUG","mo anh");
-        selectImageResultLauncher.launch(new PickVisualMediaRequest.Builder()
-                .setMediaType(ActivityResultContracts.PickVisualMedia.ImageOnly.INSTANCE)
-                .build());;
-    }
-
     ActivityResultLauncher<PickVisualMediaRequest> selectImageResultLauncher =
             registerForActivityResult(new ActivityResultContracts.PickVisualMedia(), uri -> {
                 if (uri != null) {
@@ -211,10 +231,19 @@ public class CreateNoteActivity extends AppCompatActivity {
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        Log.d("DEBUG", "request code " + requestCode);
         if (requestCode == REQUEST_CODE_STORAGE_PERMISSION && grantResults.length > 0){
-            Log.d("DEBUG", "" + grantResults[0]);
             if (grantResults[0] == PackageManager.PERMISSION_GRANTED){
                 selectImage();
+            }
+            else {
+                Toast.makeText(this, "Permission Denied!", Toast.LENGTH_SHORT).show();
+            }
+        }
+
+        if (requestCode == REQUEST_CODE_RECORD_AUDIO && grantResults.length > 0){
+            if (grantResults[0] == PackageManager.PERMISSION_GRANTED){
+                onRecord();
             }
             else {
                 Toast.makeText(this, "Permission Denied!", Toast.LENGTH_SHORT).show();
@@ -257,6 +286,72 @@ public class CreateNoteActivity extends AppCompatActivity {
                 }
             }
         });
+    }
+
+    private void addRecord(){
+        imageAddRecord.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                int requestPermission = ContextCompat.checkSelfPermission(
+                        getApplicationContext(), Manifest.permission.RECORD_AUDIO
+                );
+                if (requestPermission != PackageManager.PERMISSION_GRANTED){
+                    ActivityCompat.requestPermissions(
+                            CreateNoteActivity.this,
+                            new String[] {Manifest.permission.RECORD_AUDIO},
+                            REQUEST_CODE_STORAGE_PERMISSION
+                    );
+                }
+                else {
+                    Log.d("DEBUG", "record");
+                    onRecord();
+                }
+            }
+        });
+    }
+
+    public void onRecord(){
+        itemContainerRecord.setVisibility(View.VISIBLE);
+        audioRecord.onRecord(recordStart);
+        if (recordStart == false){
+            Toast.makeText(this, "Record done!", Toast.LENGTH_SHORT).show();
+        }
+        recordStart = !recordStart;
+    }
+
+    private void selectImage(){
+        Log.d("DEBUG","mo anh");
+        selectImageResultLauncher.launch(new PickVisualMediaRequest.Builder()
+                .setMediaType(ActivityResultContracts.PickVisualMedia.ImageOnly.INSTANCE)
+                .build());;
+    }
+
+
+    public void initRecord(){
+        ImageView imagePlayRecord = findViewById(R.id.imagePlayRecord);
+        ImageView imageRemoveRecord = findViewById(R.id.imageRemoveRecord);
+
+        imagePlayRecord.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                audioRecord.onPlay(recordStart);
+                recordStart = !recordStart;
+            }
+        });
+
+        imageRemoveRecord.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                itemContainerRecord.setVisibility(View.GONE);
+                selectedRecord = "";
+            }
+        });
+
+        if (audioRecord == null) {
+            audioRecord = new AudioRecord();
+            selectedRecord = audioRecord.getFileName();
+            Log.d("DEBUG", "co file name");
+        }
     }
 
     private void initBackgroundColor(){

@@ -85,9 +85,7 @@
                 android:id="@+id/inputNote"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="@dimen/_12sdp"
                 android:layout_marginTop="@dimen/_15sdp"
-                android:layout_marginEnd="@dimen/_12sdp"
                 android:layout_marginBottom="@dimen/_15sdp"
                 android:background="@null"
                 android:fontFamily="@font/ubuntu_regular"
@@ -100,8 +98,9 @@
                 android:textColor="@color/colorWhite"
                 android:textColorHint="@color/colorTextHint"
                 android:textSize="@dimen/_13ssp"
+                app:layout_constraintBottom_toTopOf="@id/imageNote"
                 app:layout_constraintTop_toBottomOf="@id/inputNoteTitle"
-                app:layout_constraintBottom_toTopOf="@id/imageNote"/>
+                tools:layout_editor_absoluteX="16dp" />
             
             <ImageView
                 android:id="@+id/imageNote"
@@ -113,6 +112,8 @@
                 android:adjustViewBounds="true"
                 android:visibility="gone"
                 app:layout_constraintTop_toBottomOf="@id/inputNote"/>
+
+
 
             <ImageView
                 android:id="@+id/imageRemoveImage"
@@ -127,9 +128,15 @@
                 android:visibility="gone"
                 app:layout_constraintEnd_toEndOf="@id/imageNote"
                 app:layout_constraintTop_toTopOf="@id/imageNote"/>
-            
+
+            <include
+                layout="@layout/item_container_record"
+                app:layout_constraintBottom_toBottomOf="@+id/inputNote"
+                app:layout_constraintTop_toBottomOf="@+id/inputNote" />
+
         </androidx.constraintlayout.widget.ConstraintLayout>
 
     </ScrollView>
+
     <include layout="@layout/layout_additional_action"/>
 </androidx.coordinatorlayout.widget.CoordinatorLayout>
