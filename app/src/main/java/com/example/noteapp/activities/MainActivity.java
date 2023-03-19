@@ -14,6 +14,7 @@ import androidx.activity.result.ActivityResult;
 import androidx.activity.result.ActivityResultCallback;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.RecyclerView;
@@ -24,10 +25,14 @@ import android.os.Looper;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.PopupMenu;
 import android.widget.Toast;
 
 import java.util.ArrayList;
@@ -85,7 +90,7 @@ public class MainActivity extends AppCompatActivity implements NotesListener {
 
             @Override
             public void afterTextChanged(Editable s) {
-                if (noteList.size() != 0){
+                if (noteList.size() != 0) {
                     notesAdapter.searchNotes(s.toString());
                 }
             }

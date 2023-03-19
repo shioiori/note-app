@@ -291,10 +291,8 @@ public class CreateNoteActivity extends AppCompatActivity {
             String viewId = "viewColor" + i;
             String colorName = "colorNoteColor" + i;
             int resID = getResources().getIdentifier(viewId, "id", getPackageName());
-//            Log.d("DEBUG", layoutBackgroundColor.findViewById(resID).toString());
-
             View viewColor = layoutBackgroundColor.findViewById(resID);
-            ImageView imageViewColor= imageColors.get(i - 1);
+            ImageView imageViewColor = imageColors.get(i - 1);
             viewColor.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {

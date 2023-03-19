@@ -37,26 +37,7 @@
                 app:tint="@color/colorIcons"/>
 
         </FrameLayout>
-            <FrameLayout
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:layout_marginRight="@dimen/_10sdp">
 
-                <View
-                    android:layout_width="@dimen/_35sdp"
-                    android:layout_height="@dimen/_35sdp"
-                    android:layout_gravity="center"/>
-
-                <ImageView
-                    android:id="@+id/imageAddRecord"
-                    android:layout_width="@dimen/_25sdp"
-                    android:layout_height="@dimen/_25sdp"
-                    android:layout_gravity="center"
-                    android:src="@drawable/ic_remove_image"
-                    app:tint="@color/colorIcons"/>
-
-            </FrameLayout>
 
             <FrameLayout
                 android:layout_width="0dp"
@@ -78,26 +59,7 @@
                     app:tint="@color/colorIcons"/>
 
             </FrameLayout>
-            <FrameLayout
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:layout_marginRight="@dimen/_10sdp">
 
-                <View
-                    android:layout_width="@dimen/_35sdp"
-                    android:layout_height="@dimen/_35sdp"
-                    android:layout_gravity="center"/>
-
-                <ImageView
-                    android:id="@+id/imageAddFormatText"
-                    android:layout_width="@dimen/_25sdp"
-                    android:layout_height="@dimen/_25sdp"
-                    android:layout_gravity="center"
-                    android:src="@drawable/ic_format_text"
-                    app:tint="@color/colorIcons"/>
-
-            </FrameLayout>
             <FrameLayout
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
