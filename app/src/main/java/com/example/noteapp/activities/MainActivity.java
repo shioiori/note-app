@@ -25,11 +25,13 @@ import android.os.Looper;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
+import android.view.ContextMenu;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 
+import android.widget.AdapterView;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.PopupMenu;
@@ -49,6 +51,8 @@ public class MainActivity extends AppCompatActivity implements NotesListener {
     private RecyclerView notesRecyclerView;
     private List<Note> noteList;
     private NotesAdapter notesAdapter;
+
+    private Note noteSelected;
 
     private int noteClickedPosition = -1;
 
@@ -95,15 +99,24 @@ public class MainActivity extends AppCompatActivity implements NotesListener {
                 }
             }
         });
+        registerForContextMenu(notesRecyclerView);
     }
 
     @Override
     public void onNoteClicked(Note note, int position) {
+        Log.d("DEBUG", "short");
         noteClickedPosition = position;
         Intent intent = new Intent(getApplicationContext(), CreateNoteActivity.class);
         intent.putExtra("isViewOrUpdate", true);
         intent.putExtra("note", note);
         noteClickedResultLauncher.launch(intent);
+    }
+
+    @Override
+    public void onNoteLongClicked(Note note, int position) {
+        Log.d("DEBUG", "long");
+        noteSelected = note;
+        noteClickedPosition = position;
     }
 
     ActivityResultLauncher<Intent> noteClickedResultLauncher = registerForActivityResult(
@@ -133,6 +146,7 @@ public class MainActivity extends AppCompatActivity implements NotesListener {
                     @Override
                     public void run() {
                         //UI Thread work here
+                        Log.d("DEBUG", "getnote " + noteClickedPosition);
 
                         if (requestCode == REQUEST_CODE_SHOW_NOTES){
                             noteList.addAll(notes);
@@ -144,6 +158,8 @@ public class MainActivity extends AppCompatActivity implements NotesListener {
                             notesRecyclerView.smoothScrollToPosition(0);
                         }
                         else if (requestCode == REQUEST_CODE_UPDATE_NOTE){
+                            Log.d("DEBUG", "getnote " + noteClickedPosition);
+
                             noteList.remove(noteClickedPosition);
 
                             if (isNoteDeleted){
@@ -167,9 +183,41 @@ public class MainActivity extends AppCompatActivity implements NotesListener {
                 @Override
                 public void onActivityResult(ActivityResult result) {
                     if (result.getResultCode() == Activity.RESULT_OK) {
-                            //Log.d("MY_NOTES", "" + result.getResultCode());
                             getNotes(REQUEST_CODE_ADD_NOTE, false);
                         }
                     }
             });
+
+    @Override
+    public void onCreateContextMenu(ContextMenu menu, View v, ContextMenu.ContextMenuInfo menuInfo) {
+        super.onCreateContextMenu(menu, v, menuInfo);
+        MenuInflater inflater = new MenuInflater(this);
+        inflater.inflate(R.menu.action_menu, menu);
+    }
+
+    @Override
+    public boolean onContextItemSelected(@NonNull MenuItem item) {
+        Log.d("DEBUG", "click " + noteClickedPosition);
+        Intent intent = new Intent(getApplicationContext(), CreateNoteActivity.class);
+        switch (item.getItemId()){
+            case R.id.menuEdit:
+                intent.putExtra("isViewOrUpdate", true);
+                intent.putExtra("note", noteSelected);
+                noteClickedResultLauncher.launch(intent);
+                break;
+            case R.id.menuDelete:
+                getNotes(REQUEST_CODE_UPDATE_NOTE, true);
+
+                ExecutorService executor = Executors.newSingleThreadExecutor();
+                Handler handler = new Handler(Looper.getMainLooper());
+                executor.execute(new Runnable() {
+                    @Override
+                    public void run() {
+                        NotesDatabase.getDatabase(getApplicationContext()).noteDao().deleteNote(noteSelected);
+                    }
+                });
+                break;
+        }
+        return super.onContextItemSelected(item);
+    }
 }

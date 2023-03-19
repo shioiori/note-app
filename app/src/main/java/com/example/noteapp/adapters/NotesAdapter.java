@@ -5,6 +5,8 @@ import android.graphics.Color;
 import android.graphics.drawable.GradientDrawable;
 import android.os.Handler;
 import android.os.Looper;
+import android.util.Log;
+import android.view.ContextMenu;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -57,6 +59,13 @@ public class NotesAdapter extends RecyclerView.Adapter<NotesAdapter.NoteViewHold
                 notesListener.onNoteClicked(notes.get(position), position);
             }
         });
+        holder.layoutNote.setOnLongClickListener(new View.OnLongClickListener() {
+            @Override
+            public boolean onLongClick(View v) {
+                notesListener.onNoteLongClicked(notes.get(position), position);
+                return false;
+            }
+        });
     }
 
     @Override
@@ -69,7 +78,7 @@ public class NotesAdapter extends RecyclerView.Adapter<NotesAdapter.NoteViewHold
         return position;
     }
 
-    static class NoteViewHolder extends RecyclerView.ViewHolder{
+    static class NoteViewHolder extends RecyclerView.ViewHolder implements View.OnCreateContextMenuListener {
         TextView textTitle, textDateTime, textInputNote;
         RoundedImageView imageNote;
         LinearLayout layoutNote;
@@ -81,7 +90,13 @@ public class NotesAdapter extends RecyclerView.Adapter<NotesAdapter.NoteViewHold
             textInputNote = itemView.findViewById(R.id.textInputNote);
             imageNote = itemView.findViewById(R.id.imageNote);
             layoutNote = itemView.findViewById(R.id.layoutNote);
+            itemView.setOnCreateContextMenuListener(this);
         }
+
+        @Override
+        public void onCreateContextMenu(ContextMenu menu, View v, ContextMenu.ContextMenuInfo menuInfo) {
+        }
+
 
         void setNote(Note note){
             textTitle.setText(note.getTitle());

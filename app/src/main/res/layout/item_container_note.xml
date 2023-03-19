@@ -42,7 +42,8 @@
         android:fontFamily="@font/ubuntu_regular"
         android:includeFontPadding="false"
         android:textColor="@color/colorWhite"
-        android:textSize="@dimen/_10ssp"/>
+        android:textSize="@dimen/_10ssp"
+        android:maxLength="100"/>
 
 
     <TextView
